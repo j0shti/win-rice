@@ -1,0 +1,204 @@
+diff --git a/src/components/roman.ts b/src/components/roman.ts
+new file mode 100644
+index 0000000..830187e
+--- /dev/null
++++ b/src/components/roman.ts
+@@ -0,0 +1,45 @@
++// Set to false to go back to plain numbers.
++export const USE_ROMAN_NUMERALS = true;
++
++const ROMAN_TABLE: [number, string][] = [
++  [1000, "M"],
++  [900, "CM"],
++  [500, "D"],
++  [400, "CD"],
++  [100, "C"],
++  [90, "XC"],
++  [50, "L"],
++  [40, "XL"],
++  [10, "X"],
++  [9, "IX"],
++  [5, "V"],
++  [4, "IV"],
++  [1, "I"],
++];
++
++export function toRoman(num: number): string {
++  let result = "";
++  for (const [value, symbol] of ROMAN_TABLE) {
++    while (num >= value) {
++      result += symbol;
++      num -= value;
++    }
++  }
++  return result;
++}
++
++/**
++ * Replaces standalone numbers (1-3999) in a workspace label with roman
++ * numerals. Anything else (names, icons, mixed text like "web2") is left alone,
++ * so "3", "3 " and "3 <icon>" all work.
++ */
++export function romanizeLabel<T extends string | null | undefined>(label: T): T {
++  if (!USE_ROMAN_NUMERALS || !label) {
++    return label;
++  }
++
++  return label.replace(/(?<!\w)\d+(?!\w)/g, (match) => {
++    const n = Number(match);
++    return n >= 1 && n <= 3999 ? toRoman(n) : match;
++  }) as T;
++}
+diff --git a/src/features/media.widget.tsx b/src/features/media.widget.tsx
+index ddca116..4989173 100644
+--- a/src/features/media.widget.tsx
++++ b/src/features/media.widget.tsx
+@@ -11,7 +11,12 @@ import { Motion } from "solid-motionone";
+ import { Presence } from "solid-motionone";
+ import { useProviders } from "@providers/index";
+ import { GroupItem } from "@components/group.component";
+-import { FaSolidCirclePlay, FaSolidCirclePause } from "solid-icons/fa";
++import {
++  FaSolidCirclePlay,
++  FaSolidCirclePause,
++  FaSolidBackwardStep,
++  FaSolidForwardStep,
++} from "solid-icons/fa";
+ 
+ const getSessionTitle = (session: MediaSession) => {
+   if (session.artist) {
+@@ -153,6 +158,21 @@ export function MediaWidget() {
+               easing: [0.32, 0.72, 0, 1],
+             }}
+           >
++            <Motion.button
++              class="hover:text-rose-pine-gold text-2xl origin-left inline-flex items-center"
++              initial={{ fontSize: "0", opacity: 0, scale: 0 }}
++              animate={{ fontSize: "1.5rem", opacity: 1, scale: 1 }}
++              exit={{ fontSize: "0", opacity: 0, scale: 0 }}
++              transition={{ duration: 0.5, easing: [0.32, 0.72, 0, 1] }}
++              title="Previous"
++              onClick={() => {
++                providers.media?.previous({
++                  sessionId: providers.media?.currentSession?.sessionId,
++                });
++              }}
++            >
++              <FaSolidBackwardStep class="w-4 h-4" />
++            </Motion.button>
+             <Motion.button
+               class="hover:text-rose-pine-gold text-2xl origin-left inline-flex items-center"
+               initial={{ fontSize: "0", opacity: 0, scale: 0 }}
+@@ -171,6 +191,21 @@ export function MediaWidget() {
+                 <FaSolidCirclePlay class="w-4 h-4" />
+               )}
+             </Motion.button>
++            <Motion.button
++              class="hover:text-rose-pine-gold text-2xl origin-left inline-flex items-center"
++              initial={{ fontSize: "0", opacity: 0, scale: 0 }}
++              animate={{ fontSize: "1.5rem", opacity: 1, scale: 1 }}
++              exit={{ fontSize: "0", opacity: 0, scale: 0 }}
++              transition={{ duration: 0.5, easing: [0.32, 0.72, 0, 1] }}
++              title="Next"
++              onClick={() => {
++                providers.media?.next({
++                  sessionId: providers.media?.currentSession?.sessionId,
++                });
++              }}
++            >
++              <FaSolidForwardStep class="w-4 h-4" />
++            </Motion.button>
+             <Presence exitBeforeEnter initial={false}>
+               <Show when={title()}>
+                 <div
+diff --git a/src/features/workspaces.glazewm.widget.tsx b/src/features/workspaces.glazewm.widget.tsx
+index a70959d..267679f 100644
+--- a/src/features/workspaces.glazewm.widget.tsx
++++ b/src/features/workspaces.glazewm.widget.tsx
+@@ -4,6 +4,7 @@ import { GroupItem } from "@components/group.component";
+ import { useProviders } from "@providers/index";
+ import { createStoredSignal } from "@/components/signal-storage.hook";
+ import { WorkspaceDisplayMode } from "@/components/workspaces.types";
++import { romanizeLabel } from "@/components/roman";
+ 
+ export function WorkspacesGlazewmWidget() {
+   const providers = useProviders();
+@@ -84,22 +85,24 @@ export function WorkspacesGlazewmWidget() {
+                 >
+                   <Switch>
+                     <Match when={displayMode() === WorkspaceDisplayMode.normal}>
+-                      {workspace().displayName ?? workspace().name}
++                      {romanizeLabel(workspace().displayName ?? workspace().name)}
+                     </Match>
+                     <Match when={displayMode() === WorkspaceDisplayMode.icons}>
+                       <Show
+                         when={workspace().isDisplayed}
+-                        fallback={
++                        fallback={romanizeLabel(
+                           (workspace().displayName ?? workspace().name)?.split(
+                             " ",
+-                          )[0]
+-                        }
++                          )[0],
++                        )}
+                       >
+-                        {(workspace().displayName ?? workspace().name)?.split(
+-                          " ",
+-                        )?.[1] ??
+-                          workspace().displayName ??
+-                          workspace().name}
++                        {romanizeLabel(
++                          (workspace().displayName ?? workspace().name)?.split(
++                            " ",
++                          )?.[1] ??
++                            workspace().displayName ??
++                            workspace().name,
++                        )}
+                       </Show>
+                     </Match>
+                   </Switch>
+diff --git a/src/features/workspaces.komorebi.widget.tsx b/src/features/workspaces.komorebi.widget.tsx
+index c8d4f48..7979b9c 100644
+--- a/src/features/workspaces.komorebi.widget.tsx
++++ b/src/features/workspaces.komorebi.widget.tsx
+@@ -5,6 +5,7 @@ import { shellExec } from "zebar";
+ import { useProviders } from "@providers/index";
+ import { createStoredSignal } from "@/components/signal-storage.hook";
+ import { WorkspaceDisplayMode } from "@/components/workspaces.types";
++import { romanizeLabel } from "@/components/roman";
+ 
+ export function WorkspacesKomorebiWidget() {
+   const providers = useProviders();
+@@ -117,14 +118,16 @@ export function WorkspacesKomorebiWidget() {
+                 >
+                   <Switch>
+                     <Match when={displayMode() === WorkspaceDisplayMode.normal}>
+-                      {workspace().name}
++                      {romanizeLabel(workspace().name)}
+                     </Match>
+                     <Match when={displayMode() === WorkspaceDisplayMode.icons}>
+                       <Show
+                         when={workspace() === currentMonitorWorkspace()}
+-                        fallback={workspace().name?.split(" ")[0]}
++                        fallback={romanizeLabel(workspace().name?.split(" ")[0])}
+                       >
+-                        {workspace().name?.split(" ")?.[1] ?? workspace().name}
++                        {romanizeLabel(
++                          workspace().name?.split(" ")?.[1] ?? workspace().name,
++                        )}
+                       </Show>
+                     </Match>
+                   </Switch>
+diff --git a/src/providers/index.tsx b/src/providers/index.tsx
+index 26ad6cf..28b7404 100644
+--- a/src/providers/index.tsx
++++ b/src/providers/index.tsx
+@@ -7,7 +7,7 @@ export const providers = zebar.createProviderGroup({
+   cpu: { type: "cpu" },
+   memory: { type: "memory" },
+   weather: { type: "weather" },
+-  date: { type: "date", formatting: "t" },
++  date: { type: "date", formatting: "ccc, LLL d  t" },
+   komorebi: { type: "komorebi" },
+   glazewm: { type: "glazewm" },
+   keyboard: { type: "keyboard" },

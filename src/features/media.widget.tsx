@@ -11,7 +11,12 @@ import { Motion } from "solid-motionone";
 import { Presence } from "solid-motionone";
 import { useProviders } from "@providers/index";
 import { GroupItem } from "@components/group.component";
-import { FaSolidCirclePlay, FaSolidCirclePause } from "solid-icons/fa";
+import {
+  FaSolidCirclePlay,
+  FaSolidCirclePause,
+  FaSolidBackwardStep,
+  FaSolidForwardStep,
+} from "solid-icons/fa";
 
 const getSessionTitle = (session: MediaSession) => {
   if (session.artist) {
@@ -159,6 +164,21 @@ export function MediaWidget() {
               animate={{ fontSize: "1.5rem", opacity: 1, scale: 1 }}
               exit={{ fontSize: "0", opacity: 0, scale: 0 }}
               transition={{ duration: 0.5, easing: [0.32, 0.72, 0, 1] }}
+              title="Previous"
+              onClick={() => {
+                providers.media?.previous({
+                  sessionId: providers.media?.currentSession?.sessionId,
+                });
+              }}
+            >
+              <FaSolidBackwardStep class="w-4 h-4" />
+            </Motion.button>
+            <Motion.button
+              class="hover:text-rose-pine-gold text-2xl origin-left inline-flex items-center"
+              initial={{ fontSize: "0", opacity: 0, scale: 0 }}
+              animate={{ fontSize: "1.5rem", opacity: 1, scale: 1 }}
+              exit={{ fontSize: "0", opacity: 0, scale: 0 }}
+              transition={{ duration: 0.5, easing: [0.32, 0.72, 0, 1] }}
               onClick={() => {
                 providers.media?.togglePlayPause({
                   sessionId: providers.media?.currentSession?.sessionId,
@@ -170,6 +190,21 @@ export function MediaWidget() {
               ) : (
                 <FaSolidCirclePlay class="w-4 h-4" />
               )}
+            </Motion.button>
+            <Motion.button
+              class="hover:text-rose-pine-gold text-2xl origin-left inline-flex items-center"
+              initial={{ fontSize: "0", opacity: 0, scale: 0 }}
+              animate={{ fontSize: "1.5rem", opacity: 1, scale: 1 }}
+              exit={{ fontSize: "0", opacity: 0, scale: 0 }}
+              transition={{ duration: 0.5, easing: [0.32, 0.72, 0, 1] }}
+              title="Next"
+              onClick={() => {
+                providers.media?.next({
+                  sessionId: providers.media?.currentSession?.sessionId,
+                });
+              }}
+            >
+              <FaSolidForwardStep class="w-4 h-4" />
             </Motion.button>
             <Presence exitBeforeEnter initial={false}>
               <Show when={title()}>

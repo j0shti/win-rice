@@ -5,6 +5,7 @@ import { shellExec } from "zebar";
 import { useProviders } from "@providers/index";
 import { createStoredSignal } from "@/components/signal-storage.hook";
 import { WorkspaceDisplayMode } from "@/components/workspaces.types";
+import { romanizeLabel } from "@/components/roman";
 
 export function WorkspacesKomorebiWidget() {
   const providers = useProviders();
@@ -117,14 +118,16 @@ export function WorkspacesKomorebiWidget() {
                 >
                   <Switch>
                     <Match when={displayMode() === WorkspaceDisplayMode.normal}>
-                      {workspace().name}
+                      {romanizeLabel(workspace().name)}
                     </Match>
                     <Match when={displayMode() === WorkspaceDisplayMode.icons}>
                       <Show
                         when={workspace() === currentMonitorWorkspace()}
-                        fallback={workspace().name?.split(" ")[0]}
+                        fallback={romanizeLabel(workspace().name?.split(" ")[0])}
                       >
-                        {workspace().name?.split(" ")?.[1] ?? workspace().name}
+                        {romanizeLabel(
+                          workspace().name?.split(" ")?.[1] ?? workspace().name,
+                        )}
                       </Show>
                     </Match>
                   </Switch>

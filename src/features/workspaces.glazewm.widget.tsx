@@ -4,6 +4,7 @@ import { GroupItem } from "@components/group.component";
 import { useProviders } from "@providers/index";
 import { createStoredSignal } from "@/components/signal-storage.hook";
 import { WorkspaceDisplayMode } from "@/components/workspaces.types";
+import { romanizeLabel } from "@/components/roman";
 
 export function WorkspacesGlazewmWidget() {
   const providers = useProviders();
@@ -84,22 +85,24 @@ export function WorkspacesGlazewmWidget() {
                 >
                   <Switch>
                     <Match when={displayMode() === WorkspaceDisplayMode.normal}>
-                      {workspace().displayName ?? workspace().name}
+                      {romanizeLabel(workspace().displayName ?? workspace().name)}
                     </Match>
                     <Match when={displayMode() === WorkspaceDisplayMode.icons}>
                       <Show
                         when={workspace().isDisplayed}
-                        fallback={
+                        fallback={romanizeLabel(
                           (workspace().displayName ?? workspace().name)?.split(
                             " ",
-                          )[0]
-                        }
+                          )[0],
+                        )}
                       >
-                        {(workspace().displayName ?? workspace().name)?.split(
-                          " ",
-                        )?.[1] ??
-                          workspace().displayName ??
-                          workspace().name}
+                        {romanizeLabel(
+                          (workspace().displayName ?? workspace().name)?.split(
+                            " ",
+                          )?.[1] ??
+                            workspace().displayName ??
+                            workspace().name,
+                        )}
                       </Show>
                     </Match>
                   </Switch>
