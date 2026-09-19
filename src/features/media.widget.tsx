@@ -283,9 +283,12 @@ export function MediaWidget() {
                   </div>
                   <Show when={progress() !== undefined}>
                     <div class="h-[3px] w-full rounded-full overflow-hidden bg-rose-pine-highlight-high">
+                      {/* Slides with transform (GPU-composited) instead of animating width, which forces layout every frame. */}
                       <div
-                        class="h-full rounded-full bg-rose-pine-gold transition-[width] duration-1000 ease-linear"
-                        style={{ width: `${(progress() ?? 0) * 100}%` }}
+                        class="h-full w-full rounded-full bg-rose-pine-gold transition-transform duration-1000 ease-linear"
+                        style={{
+                          transform: `translateX(${((progress() ?? 0) - 1) * 100}%)`,
+                        }}
                       />
                     </div>
                   </Show>
