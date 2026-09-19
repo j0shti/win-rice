@@ -40,7 +40,19 @@
   }
 }
 
+/* No focus box / selection highlight after clicking bar controls. */
+button {
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus,
+button:focus-visible {
+  outline: none;
+}
+
 body {
+  user-select: none;
   font-family:
     Hack Nerd Font Mono,
     ui-monospace,

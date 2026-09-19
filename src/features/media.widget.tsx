@@ -185,7 +185,8 @@ export function MediaWidget() {
               exit={{ fontSize: "0", opacity: 0, scale: 0 }}
               transition={{ duration: 0.5, easing: [0.32, 0.72, 0, 1] }}
               title="Previous"
-              onClick={() => {
+              onClick={(e) => {
+                e.currentTarget.blur();
                 providers.media?.previous({
                   sessionId: providers.media?.currentSession?.sessionId,
                 });
@@ -199,7 +200,8 @@ export function MediaWidget() {
               animate={{ fontSize: "1.5rem", opacity: 1, scale: 1 }}
               exit={{ fontSize: "0", opacity: 0, scale: 0 }}
               transition={{ duration: 0.5, easing: [0.32, 0.72, 0, 1] }}
-              onClick={() => {
+              onClick={(e) => {
+                e.currentTarget.blur();
                 providers.media?.togglePlayPause({
                   sessionId: providers.media?.currentSession?.sessionId,
                 });
@@ -218,7 +220,8 @@ export function MediaWidget() {
               exit={{ fontSize: "0", opacity: 0, scale: 0 }}
               transition={{ duration: 0.5, easing: [0.32, 0.72, 0, 1] }}
               title="Next"
-              onClick={() => {
+              onClick={(e) => {
+                e.currentTarget.blur();
                 providers.media?.next({
                   sessionId: providers.media?.currentSession?.sessionId,
                 });
@@ -228,7 +231,7 @@ export function MediaWidget() {
             </Motion.button>
             <Presence exitBeforeEnter initial={false}>
               <Show when={title()}>
-                <div class="flex flex-col justify-center gap-[3px]">
+                <div class="flex flex-col justify-center gap-[2px] leading-[1.2]">
                   <div
                     ref={containerRef}
                     class="overflow-clip max-w-[200px] inline-flex justify-start items-center"
