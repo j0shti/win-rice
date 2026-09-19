@@ -4,6 +4,7 @@ import { onCleanup, onMount, useContext } from "solid-js";
 import { createContext, ParentProps } from "solid-js";
 
 export const providers = zebar.createProviderGroup({
+  battery: { type: "battery" },
   cpu: { type: "cpu" },
   memory: { type: "memory" },
   weather: { type: "weather" },

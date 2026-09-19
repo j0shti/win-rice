@@ -9,6 +9,7 @@ export type GroupProps = {
   onClick?: JSX.EventHandler<HTMLDivElement, MouseEvent>;
   onContextMenu?: JSX.EventHandler<HTMLDivElement, MouseEvent>;
   animationOptions?: Options;
+  title?: string;
 };
 
 export const Group: ParentComponent<GroupProps> = (props) => {
@@ -40,6 +41,7 @@ export const GroupItem: ParentComponent<GroupProps> = (props) => {
       )}
       onClick={props.onClick}
       onContextMenu={props.onContextMenu}
+      title={props.title}
     >
       {props.children}
     </div>

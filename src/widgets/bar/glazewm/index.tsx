@@ -6,6 +6,7 @@ import { ProvidersProvider } from "@providers/index";
 import { Group } from "@components/group.component";
 import { MediaWidget } from "@features/media.widget";
 import { MetricsWidget } from "@features/metrics.widget";
+import { BatteryWidget } from "@features/battery.widget";
 import { KeyboardLayoutWidget } from "@features/keyboard-layout.widget";
 import { DateTimeWidget } from "@features/date-time.widget";
 import { onMount } from "solid-js";
@@ -75,6 +76,7 @@ export function RightGroup() {
       class="justify-self-end justify-end"
     >
       <MetricsWidget />
+      <BatteryWidget />
       <KeyboardLayoutWidget />
       <DateTimeWidget />
     </Group>
