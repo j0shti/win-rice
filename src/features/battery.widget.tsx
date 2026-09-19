@@ -14,7 +14,7 @@ import {
 const LOW_BATTERY_PERCENT = 20;
 
 function formatSeconds(seconds: number | null | undefined) {
-  if (!seconds || seconds <= 0) {
+  if (!seconds || seconds <= 0 || !Number.isFinite(seconds)) {
     return undefined;
   }
 
