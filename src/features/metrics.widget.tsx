@@ -14,8 +14,49 @@ import {
 } from "solid-js";
 import { useMotionValue } from "@/motion/hooks";
 import { FaSolidMemory } from "solid-icons/fa";
-import { FaSolidSun } from "solid-icons/fa";
 import { RiDeviceCpuLine } from "solid-icons/ri";
+import {
+  WiDayCloudy,
+  WiDayRain,
+  WiDayShowers,
+  WiDaySnow,
+  WiDaySunny,
+  WiDayThunderstorm,
+  WiNightAltCloudy,
+  WiNightAltRain,
+  WiNightAltShowers,
+  WiNightAltSnow,
+  WiNightAltThunderstorm,
+  WiNightClear,
+} from "solid-icons/wi";
+import type { Component } from "solid-js";
+import type { WeatherStatus } from "zebar";
+
+// Zebar reports one of these statuses; each gets its own icon.
+const WEATHER_ICONS: Record<WeatherStatus, Component<{ class?: string }>> = {
+  clear_day: WiDaySunny,
+  clear_night: WiNightClear,
+  cloudy_day: WiDayCloudy,
+  cloudy_night: WiNightAltCloudy,
+  light_rain_day: WiDayShowers,
+  light_rain_night: WiNightAltShowers,
+  heavy_rain_day: WiDayRain,
+  heavy_rain_night: WiNightAltRain,
+  snow_day: WiDaySnow,
+  snow_night: WiNightAltSnow,
+  thunder_day: WiDayThunderstorm,
+  thunder_night: WiNightAltThunderstorm,
+};
+
+// Picks an icon color from the temperature in Fahrenheit.
+function tempColor(f: number) {
+  if (f <= -4) return "text-rose-pine-foam";
+  if (f <= 14) return "text-rose-pine-pine";
+  if (f <= 41) return "text-rose-pine-iris";
+  if (f <= 57) return "text-rose-pine-rose";
+  if (f <= 77) return "text-rose-pine-gold";
+  return "text-rose-pine-love";
+}
 
 function Metric(props: ParentProps) {
   return (
@@ -77,7 +118,7 @@ export function MetricsWidget() {
     metricsAnimation(
       weather.raw,
       createMemo(() => {
-        const usage = providers.weather?.celsiusTemp;
+        const usage = providers.weather?.fahrenheitTemp;
         return usage;
       }),
     ),
@@ -94,23 +135,17 @@ export function MetricsWidget() {
         {Math.round(memoryUsage.get()).toLocaleString(undefined, {})}%
       </Metric>
       <Metric>
-        <FaSolidSun
-          class="w-3.5 h-3.5 transition-colors"
-          classList={{
-            "text-rose-pine-foam": weather.get() <= -20,
-
-            "text-rose-pine-pine": weather.get() <= -10,
-
-            "text-rose-pine-iris": weather.get() <= 5,
-
-            "text-rose-pine-rose": weather.get() <= 14,
-
-            "text-rose-pine-gold": weather.get() <= 25,
-
-            "text-rose-pine-love": weather.get() >= 25,
-          }}
-        />
-        {Math.round(weather.get())}°
+        {(() => {
+          const WeatherIcon =
+            WEATHER_ICONS[providers.weather?.status ?? "clear_day"] ??
+            WiDaySunny;
+          return (
+            <WeatherIcon
+              class={`w-5 h-5 transition-colors ${tempColor(weather.get())}`}
+            />
+          );
+        })()}
+        {Math.round(weather.get())}°F
       </Metric>
     </GroupItem>
   );
