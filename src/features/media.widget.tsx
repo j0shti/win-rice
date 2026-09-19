@@ -11,6 +11,7 @@ import { Motion } from "solid-motionone";
 import { Presence } from "solid-motionone";
 import { useProviders } from "@providers/index";
 import { GroupItem } from "@components/group.component";
+import { createMediaProgress, formatTime } from "@components/media-progress";
 import {
   FaSolidCirclePlay,
   FaSolidCirclePause,
@@ -85,6 +86,25 @@ export function MediaWidget() {
     }
 
     return getSessionTitle(session);
+  });
+
+  const {
+    progress,
+    elapsed,
+    duration: mediaLength,
+    remaining,
+  } = createMediaProgress(
+    () => providers.media?.currentSession,
+  );
+
+  const tooltip = createMemo(() => {
+    const base = title();
+    const left = remaining();
+    if (!base || left === undefined) {
+      return base;
+    }
+
+    return `${base}\n${formatTime(elapsed() ?? 0)} / ${formatTime(mediaLength() ?? 0)} (-${formatTime(left)})`;
   });
 
   let textRef: HTMLSpanElement | undefined;
@@ -208,54 +228,64 @@ export function MediaWidget() {
             </Motion.button>
             <Presence exitBeforeEnter initial={false}>
               <Show when={title()}>
-                <div
-                  ref={containerRef}
-                  class="overflow-clip max-w-[200px] inline-flex justify-start items-center"
-                  title={title()}
-                >
-                  <span
-                    class="whitespace-nowrap absolute opacity-0 pointer-events-none block w-fit"
-                    ref={textRef}
+                <div class="flex flex-col justify-center gap-[3px]">
+                  <div
+                    ref={containerRef}
+                    class="overflow-clip max-w-[200px] inline-flex justify-start items-center"
+                    title={tooltip()}
                   >
-                    {title()}
-                  </span>
-                  <Motion.span
-                    initial={{
-                      x: "-100%",
-                    }}
-                    animate={{
-                      x: "0%",
-                    }}
-                    exit={{
-                      x: "-100%",
-                    }}
-                    transition={{
-                      easing: [0.32, 0.72, 0, 1],
-                      duration: 0.25,
-                    }}
-                  >
+                    <span
+                      class="whitespace-nowrap absolute opacity-0 pointer-events-none block w-fit"
+                      ref={textRef}
+                    >
+                      {title()}
+                    </span>
                     <Motion.span
-                      class="block w-fit"
                       initial={{
-                        x: "100%",
+                        x: "-100%",
                       }}
                       animate={{
-                        x:
-                          shouldScroll() && textRef && containerRef
-                            ? calculateAnimation(textRef, containerRef)
-                            : 0,
+                        x: "0%",
+                      }}
+                      exit={{
+                        x: "-100%",
                       }}
                       transition={{
-                        duration: shouldScroll() ? duration() : 0.25,
-                        repeat: shouldScroll() ? Infinity : 0,
-                        easing: shouldScroll() ? "linear" : [0.32, 0.72, 0, 1],
+                        easing: [0.32, 0.72, 0, 1],
+                        duration: 0.25,
                       }}
                     >
-                      <Show when={shouldScroll()} fallback={title()}>
-                        {title()} | {title()}
-                      </Show>
+                      <Motion.span
+                        class="block w-fit"
+                        initial={{
+                          x: "100%",
+                        }}
+                        animate={{
+                          x:
+                            shouldScroll() && textRef && containerRef
+                              ? calculateAnimation(textRef, containerRef)
+                              : 0,
+                        }}
+                        transition={{
+                          duration: shouldScroll() ? duration() : 0.25,
+                          repeat: shouldScroll() ? Infinity : 0,
+                          easing: shouldScroll() ? "linear" : [0.32, 0.72, 0, 1],
+                        }}
+                      >
+                        <Show when={shouldScroll()} fallback={title()}>
+                          {title()} | {title()}
+                        </Show>
+                      </Motion.span>
                     </Motion.span>
-                  </Motion.span>
+                  </div>
+                  <Show when={progress() !== undefined}>
+                    <div class="h-[3px] w-full rounded-full overflow-hidden bg-rose-pine-highlight-high">
+                      <div
+                        class="h-full rounded-full bg-rose-pine-gold transition-[width] duration-1000 ease-linear"
+                        style={{ width: `${(progress() ?? 0) * 100}%` }}
+                      />
+                    </div>
+                  </Show>
                 </div>
               </Show>
             </Presence>

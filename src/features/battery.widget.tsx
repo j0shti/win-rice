@@ -13,12 +13,13 @@ import {
 // Below this percentage (and not charging) the widget turns red.
 const LOW_BATTERY_PERCENT = 20;
 
-function formatSeconds(seconds: number | null | undefined) {
-  if (!seconds || seconds <= 0 || !Number.isFinite(seconds)) {
+// Zebar reports battery time estimates in milliseconds.
+export function formatDuration(milliseconds: number | null | undefined) {
+  if (!milliseconds || milliseconds <= 0 || !Number.isFinite(milliseconds)) {
     return undefined;
   }
 
-  const totalMinutes = Math.round(seconds / 60);
+  const totalMinutes = Math.round(milliseconds / 60_000);
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
 
@@ -50,11 +51,11 @@ export function BatteryWidget() {
     }
 
     if (battery.isCharging) {
-      const time = formatSeconds(battery.timeTillFull);
+      const time = formatDuration(battery.timeTillFull);
       return time ? `Charging - ${time} until full` : "Charging";
     }
 
-    const time = formatSeconds(battery.timeTillEmpty);
+    const time = formatDuration(battery.timeTillEmpty);
     return time ? `On battery - ${time} remaining` : "On battery";
   });
 
