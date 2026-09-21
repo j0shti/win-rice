@@ -1,4 +1,5 @@
 import { createMemo, Show } from "solid-js";
+import { Dynamic } from "solid-js/web";
 import { GroupItem } from "@components/group.component";
 import { useProviders } from "@providers/index";
 import {
@@ -59,15 +60,16 @@ export function BatteryWidget() {
     return time ? `On battery - ${time} remaining` : "On battery";
   });
 
-  const Icon = () => {
+  // A memo (not a component body) so the icon follows the percentage as it changes.
+  const BatteryIcon = createMemo(() => {
     const value = percent() ?? 0;
 
-    if (value > 87) return <FaSolidBatteryFull class="w-4 h-4" />;
-    if (value > 62) return <FaSolidBatteryThreeQuarters class="w-4 h-4" />;
-    if (value > 37) return <FaSolidBatteryHalf class="w-4 h-4" />;
-    if (value > 12) return <FaSolidBatteryQuarter class="w-4 h-4" />;
-    return <FaSolidBatteryEmpty class="w-4 h-4" />;
-  };
+    if (value > 87) return FaSolidBatteryFull;
+    if (value > 62) return FaSolidBatteryThreeQuarters;
+    if (value > 37) return FaSolidBatteryHalf;
+    if (value > 12) return FaSolidBatteryQuarter;
+    return FaSolidBatteryEmpty;
+  });
 
   // Desktops (no battery) report no data, so the widget stays hidden.
   return (
@@ -80,7 +82,7 @@ export function BatteryWidget() {
             "text-rose-pine-love": isLow(),
           }}
         >
-          <Icon />
+          <Dynamic component={BatteryIcon()} class="w-4 h-4" />
           <Show when={isCharging()}>
             <FaSolidBolt class="w-3 h-3" />
           </Show>
